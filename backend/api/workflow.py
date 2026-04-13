@@ -50,6 +50,12 @@ def api_enc():
         "ok": True,
         "C1_hex": ct["C1_hex"], "C2_hex": ct["C2_hex"],
         "C3_hex": ct["C3_hex"], "C4_hex": ct["C4_hex"],
+        "pypbc_enabled": ct.get("pypbc_enabled", False),
+        "C1_pypbc_hex": ct.get("C1_pypbc_hex"),
+        "C2_pypbc_hex": ct.get("C2_pypbc_hex"),
+        "C3_pypbc_hex": ct.get("C3_pypbc_hex"),
+        "C4_pypbc_hex": ct.get("C4_pypbc_hex"),
+        "Y_pi_pypbc_hex": ct.get("Y_pi_pypbc_hex"),
         "keyword": kw, "time_period": tp, "num_aas": len(sel),
         "scheme": "OSBE (Li, Du, Boneh 2003)",
         "msg": "服务已加密并存入数据库 DB",
@@ -74,7 +80,18 @@ def api_acc_req():
     u["perm_tp"] = tp
     return jsonify({
         "ok": True,
-        "permissions": [{"aa_id": p["aa_id"], "K_j_hex": p["K_j_hex"], "formula": p["formula"]} for p in perms],
+        "permissions": [{
+            "aa_id": p["aa_id"],
+            "K_j_hex": p["K_j_hex"],
+            "formula": p["formula"],
+            "pypbc_enabled": p.get("pypbc_enabled", False),
+            "proof_verified": p.get("proof_verified"),
+            "K_j_pypbc_hex": p.get("K_j_pypbc_hex"),
+            "msg_pypbc_hex": p.get("msg_pypbc_hex"),
+            "z_i_pypbc_hex": p.get("z_i_pypbc_hex"),
+            "challenge_pypbc_hex": p.get("challenge_pypbc_hex"),
+            "formula_pypbc": p.get("formula_pypbc"),
+        } for p in perms],
         "msg": f"已从 {len(perms)} 个AA获取访问权限（多签名）",
     })
 
