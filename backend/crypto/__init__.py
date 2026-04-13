@@ -439,10 +439,12 @@ def _acc_req_pypbc(user: dict, credential: dict, pseudonym: dict,
     PU1 = g ** r_u
     PU2 = Y_U * (Y_TA ** r_u)
 
-    sigma_u_sim = credential.get("sigma_U")
-    if not isinstance(sigma_u_sim, dict) or "e" not in sigma_u_sim:
-        raise ValueError("missing sigma_U in credential")
-    sigma_u = g ** _pbc_zr(sigma_u_sim["e"])
+    # Recompute sigma_U in pypbc domain to avoid cross-domain mismatch with
+    # legacy simulation credential representation.
+    denom = x_ra + d_u
+    if int(denom) == 0:
+        raise ValueError("invalid credential: x_ra + d_u == 0 in Zr")
+    sigma_u = (g0 * Y_U * (g1 ** e_u)) ** (~denom)
     sigma_prime = sigma_u * (g2 ** s_u)
 
     v_x = pypbc.Element.random(pairing_obj, pypbc.Zr)
@@ -493,7 +495,10 @@ def _acc_req_pypbc(user: dict, credential: dict, pseudonym: dict,
     )
     proof_ok = (c == c_check)
     if not proof_ok:
-        raise ValueError("Acc_Req proof verification failed under pypbc")
+        raise ValueError(
+            "Acc_Req proof verification failed under pypbc "
+            f"(c={_elem_hex(c)}, c_check={_elem_hex(c_check)})"
+        )
 
     all_Y = [g_bar ** _pbc_zr(_sim_scalar(pk)) for pk in all_aa_pks]
     all_Y_hex = [_elem_hex(y) for y in all_Y]
@@ -558,16 +563,23 @@ def acc_req(user: dict, credential: dict, pseudonym: dict,
     }
 
     if _pbc_enabled():
-        pbc_out = _acc_req_pypbc(user, credential, pseudonym, aa, all_aa_pks, keyword, time_period)
-        out.update({
-            "pypbc_enabled": True,
-            "proof_verified": pbc_out["proof_verified"],
-            "K_j_pypbc_hex": pbc_out["K_j_hex"],
-            "msg_pypbc_hex": pbc_out["msg_hex"],
-            "z_i_pypbc_hex": pbc_out["z_i_hex"],
-            "challenge_pypbc_hex": pbc_out["challenge_hex"],
-            "formula_pypbc": pbc_out["formula"],
-        })
+        try:
+            pbc_out = _acc_req_pypbc(user, credential, pseudonym, aa, all_aa_pks, keyword, time_period)
+            out.update({
+                "pypbc_enabled": True,
+                "proof_verified": pbc_out["proof_verified"],
+                "K_j_pypbc_hex": pbc_out["K_j_hex"],
+                "msg_pypbc_hex": pbc_out["msg_hex"],
+                "z_i_pypbc_hex": pbc_out["z_i_hex"],
+                "challenge_pypbc_hex": pbc_out["challenge_hex"],
+                "formula_pypbc": pbc_out["formula"],
+            })
+        except Exception as exc:
+            out.update({
+                "pypbc_enabled": True,
+                "proof_verified": False,
+                "pypbc_error": str(exc),
+            })
     else:
         out["pypbc_enabled"] = False
 
