@@ -477,13 +477,13 @@ def _acc_req_pypbc(user: dict, credential: dict, pseudonym: dict,
     R1_p = (g ** z_r) * (PU1 ** (-c))
     R2_p = (g ** z_x) * (Y_TA ** z_r) * (PU2 ** (-c))
 
-    frac = pairing_obj.apply(sigma_prime, Y_RA) / pairing_obj.apply(g0, g_bar)
     R3_p = (pairing_obj.apply(g, g_bar) ** z_x) \
         * (pairing_obj.apply(g1, g_bar) ** z_e) \
         * (pairing_obj.apply(sigma_prime, g_bar) ** (-z_d)) \
         * (pairing_obj.apply(g2, g_bar) ** z_y) \
         * (pairing_obj.apply(g2, Y_RA) ** z_s) \
-        * (frac ** (-c))
+        * (pairing_obj.apply(sigma_prime, Y_RA) ** (-c)) \
+        * (pairing_obj.apply(g0, g_bar) ** c)
 
     c_check = _pbc_hash_to_group(
         pypbc.Zr,
