@@ -1,0 +1,19 @@
+# Node.js
+node_modules/
+dist/
+.env
+.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+venv/
+env/
+.env
+
+# OS/IDE
+.DS_Store
+.vscode/
+.idea/
