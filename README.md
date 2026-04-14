@@ -6,6 +6,36 @@
 
 ---
 
+## 前置依赖 (PyPBC)
+
+Linux 系统（以 Ubuntu 为例）是安装 PyPBC 最为顺畅的平台之一。
+
+### linux
+
+### 1 安装 PBC 库
+```bash
+sudo apt-get update
+sudo apt-get install libpbc-dev
+```
+
+### 2 安装 PyPBC
+```bash
+pip install pypbc
+```
+
+### 3 验证安装
+```bash
+python -c "import pypbc; print(pypbc.__version__)"
+```
+
+### windows
+
+Windows 上安装 PyPBC 最具挑战性，因为需要手动处理 PBC 库的编译问题
+
+参考：https://www.oryoy.com/news/qing-song-shang-shou-windows-xi-tong-xia-pypbc-ku-an-zhuang-zhi-nan-yu-chang-jian-wen-ti-jie-da.html
+
+---
+
 ## 快速启动
 
 ### 1. 启动后端
@@ -27,6 +57,25 @@ npm run dev
 ```
 
 浏览器打开 http://localhost:3000 即可访问系统。
+
+### 3. （可选）脚本启动
+
+#### Linux / macOS（`start_forlinux.sh`）
+
+首次执行建议先赋予可执行权限
+
+```bash
+chmod +x start_forlinux.sh
+./start_forlinux.sh
+```
+
+#### Windows（`start_forwin.bat`）
+
+可双击执行，或在项目根目录命令行运行：
+
+```bat
+start_forwin.bat
+```
 
 ---
 

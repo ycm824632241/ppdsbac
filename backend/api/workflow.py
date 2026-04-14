@@ -51,6 +51,9 @@ def api_enc():
         "C1_hex": ct["C1_hex"], "C2_hex": ct["C2_hex"],
         "C3_hex": ct["C3_hex"], "C4_hex": ct["C4_hex"],
         "pypbc_enabled": ct.get("pypbc_enabled", False),
+        "pypbc_used": ct.get("pypbc_used", False),
+        "compute_backend": ct.get("compute_backend", "simulation"),
+        "pypbc_error": ct.get("pypbc_error"),
         "C1_pypbc_hex": ct.get("C1_pypbc_hex"),
         "C2_pypbc_hex": ct.get("C2_pypbc_hex"),
         "C3_pypbc_hex": ct.get("C3_pypbc_hex"),
@@ -80,12 +83,18 @@ def api_acc_req():
     u["perm_tp"] = tp
     return jsonify({
         "ok": True,
+        "pypbc_enabled": any(p.get("pypbc_enabled", False) for p in perms),
+        "pypbc_used_all": all(p.get("pypbc_used", False) for p in perms),
+        "compute_backend": "simulation+pypbc" if all(p.get("pypbc_used", False) for p in perms) else "simulation",
         "permissions": [{
             "aa_id": p["aa_id"],
             "K_j_hex": p["K_j_hex"],
             "formula": p["formula"],
             "pypbc_enabled": p.get("pypbc_enabled", False),
+            "pypbc_used": p.get("pypbc_used", False),
+            "compute_backend": p.get("compute_backend", "simulation"),
             "proof_verified": p.get("proof_verified"),
+            "pypbc_error": p.get("pypbc_error"),
             "K_j_pypbc_hex": p.get("K_j_pypbc_hex"),
             "msg_pypbc_hex": p.get("msg_pypbc_hex"),
             "z_i_pypbc_hex": p.get("z_i_pypbc_hex"),

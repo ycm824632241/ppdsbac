@@ -560,13 +560,17 @@ def acc_req(user: dict, credential: dict, pseudonym: dict,
         "keyword": keyword, "time_period": time_period,
         "msg_hex": to_hex(msg),
         "formula": f"K_j = (H1({keyword}‖{time_period})·h0·h1^H2(PU))^(x_j·z_j)",
+        "pypbc_enabled": _pbc_enabled(),
+        "pypbc_used": False,
+        "compute_backend": "simulation",
     }
 
-    if _pbc_enabled():
+    if out["pypbc_enabled"]:
         try:
             pbc_out = _acc_req_pypbc(user, credential, pseudonym, aa, all_aa_pks, keyword, time_period)
             out.update({
-                "pypbc_enabled": True,
+                "pypbc_used": True,
+                "compute_backend": "simulation+pypbc",
                 "proof_verified": pbc_out["proof_verified"],
                 "K_j_pypbc_hex": pbc_out["K_j_hex"],
                 "msg_pypbc_hex": pbc_out["msg_hex"],
@@ -576,12 +580,10 @@ def acc_req(user: dict, credential: dict, pseudonym: dict,
             })
         except Exception as exc:
             out.update({
-                "pypbc_enabled": True,
+                "pypbc_used": False,
                 "proof_verified": False,
                 "pypbc_error": str(exc),
             })
-    else:
-        out["pypbc_enabled"] = False
 
     return out
 
@@ -646,21 +648,29 @@ def enc(aa_pks: list, keyword: str, time_period: str, message: str) -> dict:
         "keyword": keyword, "time_period": time_period,
         "_message": message, "_M_int": M_int,
         "_pair_gam_e": pair_gam["e"],
+        "pypbc_enabled": _pbc_enabled(),
+        "pypbc_used": False,
+        "compute_backend": "simulation",
     }
 
-    if _pbc_enabled():
-        pbc_ct = _enc_pypbc(aa_pks, keyword, time_period, message)
-        out.update({
-            "pypbc_enabled": True,
-            "C1_pypbc_hex": pbc_ct["C1_hex"],
-            "C2_pypbc_hex": pbc_ct["C2_hex"],
-            "C3_pypbc_hex": pbc_ct["C3_hex"],
-            "C4_pypbc_hex": pbc_ct["C4_hex"],
-            "Y_pi_pypbc_hex": pbc_ct["Y_pi_hex"],
-            "policy_size": pbc_ct["policy_size"],
-        })
-    else:
-        out["pypbc_enabled"] = False
+    if out["pypbc_enabled"]:
+        try:
+            pbc_ct = _enc_pypbc(aa_pks, keyword, time_period, message)
+            out.update({
+                "pypbc_used": True,
+                "compute_backend": "simulation+pypbc",
+                "C1_pypbc_hex": pbc_ct["C1_hex"],
+                "C2_pypbc_hex": pbc_ct["C2_hex"],
+                "C3_pypbc_hex": pbc_ct["C3_hex"],
+                "C4_pypbc_hex": pbc_ct["C4_hex"],
+                "Y_pi_pypbc_hex": pbc_ct["Y_pi_hex"],
+                "policy_size": pbc_ct["policy_size"],
+            })
+        except Exception as exc:
+            out.update({
+                "pypbc_used": False,
+                "pypbc_error": str(exc),
+            })
 
     return out
 
